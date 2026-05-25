@@ -1,32 +1,36 @@
-"use client";
-
+'use client';
 
 import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { Bookmark, BookmarkPlus, Box, Loader, SquareArrowOutUpRight } from 'lucide-react';
 import { LibraryItem, setModalStatus, setNewEntryStatus, setTarget } from './useLibStore';
 import { isBookmarkedAction } from '@/app/action';
+import { getAuthCredentials } from './authStorage';
 import { toast } from 'sonner';
 
-
-
-
-export default function LibCard({ lib }: { lib: LibraryItem; }) {
-
-
+export default function LibCard({ lib }: { lib: LibraryItem }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
+
   function handleBookmark(lib: LibraryItem) {
+    const credentials = getAuthCredentials();
+    if (!credentials) {
+      toast.error('Please sign in to bookmark libraries');
+      router.push('/sign-in');
+      return;
+    }
+
     startTransition(async () => {
-      const res = await isBookmarkedAction(lib);
+      const res = await isBookmarkedAction(lib, credentials);
       if (res.success) {
         toast.success(res.message);
+        window.dispatchEvent(new Event('libs-updated'));
+        window.dispatchEvent(new Event('mylib-updated'));
       } else {
         toast.error(res.message);
       }
     });
   }
-
-
-
 
   return (
     <div className="group flex flex-col rounded-2xl border border-slate-700/50 bg-slate-800/30 p-6 transition-all duration-500 hover:scale-105 hover:border-cyan-500/90 hover:bg-slate-800 hover:shadow-lg hover:shadow-cyan-500/40">
@@ -59,10 +63,13 @@ export default function LibCard({ lib }: { lib: LibraryItem; }) {
           onClick={() => handleBookmark(lib)}
           disabled={pending}
           className="group/save flex items-center justify-center rounded-r-lg border border-slate-600 bg-slate-800 px-4 text-cyan-400 transition-colors hover:bg-slate-700 hover:text-white">
-          {pending ? (<Loader className="animate-spin" />) : (((lib.isBookmarked) ?
-            <BookmarkPlus className="group-hover/save:scale-110 transition-transform" />
-            :
-            <Bookmark className="group-hover/save:scale-110 transition-transform" />))}
+          {pending ? (
+            <Loader className="animate-spin" />
+          ) : lib.isBookmarked ? (
+            <BookmarkPlus className="transition-transform group-hover/save:scale-110" />
+          ) : (
+            <Bookmark className="transition-transform group-hover/save:scale-110" />
+          )}
         </button>
       </div>
     </div>

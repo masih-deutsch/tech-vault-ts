@@ -4,6 +4,7 @@ import { useActionState, useEffect, useTransition } from 'react';
 import { LibraryBig, Link, Loader, PackageX, Save, Terminal, X } from 'lucide-react';
 import { resetTarget, setModalStatus, useLibStore } from './useLibStore';
 import { createLibAction, removeLibAction, updateLibAction } from '../app/action';
+import { getAuthCredentials } from './authStorage';
 import { toast } from 'sonner';
 
 
@@ -17,7 +18,13 @@ export default function Modal() {
   const target = useLibStore((s) => s.target);
   const newEntryStatus = useLibStore((s) => s.newEntryStatus);
 
-  const [state, formAction, pending] = useActionState<ActionResponse | null, FormData>(newEntryStatus ? createLibAction : updateLibAction.bind(null, target), null,);
+  const credentials = getAuthCredentials();
+  const [state, formAction, pending] = useActionState<ActionResponse | null, FormData>(
+    newEntryStatus && credentials
+      ? createLibAction.bind(null, credentials)
+      : updateLibAction.bind(null, target),
+    null,
+  );
 
   const [delPending, startTransition] = useTransition();
 
