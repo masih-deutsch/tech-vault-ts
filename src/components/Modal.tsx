@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useTransition } from 'react';
-import { KeyRound, LibraryBig, Link, Loader, PackageX, Save, Terminal, X } from 'lucide-react';
+import { LibraryBig, Link, Loader, PackageX, Save, Terminal, X } from 'lucide-react';
 import { resetTarget, setModalStatus, setMyPass, useLibStore } from './useLibStore';
 import { createLibAction, removeLibAction, updateLibAction } from '../app/action';
 import { toast } from 'sonner';
@@ -24,11 +24,10 @@ export default function Modal() {
 
 
   const [delPending, startTransition] = useTransition();
-  const myPass = useLibStore(s => s.myPass);
 
   function handleDelete() {
     startTransition(async () => {
-      const res = await removeLibAction(target.id, myPass);
+      const res = await removeLibAction(target.id);
       if (res.success) {
         toast.success(res?.message);
         setModalStatus(false);
@@ -141,21 +140,6 @@ export default function Modal() {
                     defaultValue={target.docsUrl}
                     type='text'
                     placeholder='https://...'
-                    className='w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-3 text-sm text-white transition-colors focus:border-cyan-500 focus:outline-none'
-                  />
-                </div>
-              </label>
-
-              <label className='mb-1 block text-sm font-medium text-slate-400'>
-                Password
-                <div className='relative mt-1'>
-                  <KeyRound className='absolute left-3 top-3 text-slate-500' />
-                  <input
-                    value={myPass}
-                    onChange={e => setMyPass(e.target.value)}
-                    name='password'
-                    type='password'
-                    placeholder='Enter the PASSWORD ...'
                     className='w-full rounded-lg border border-slate-700 bg-slate-950 py-3 pl-11 pr-3 text-sm text-white transition-colors focus:border-cyan-500 focus:outline-none'
                   />
                 </div>

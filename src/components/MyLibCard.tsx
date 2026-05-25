@@ -3,22 +3,34 @@ import { personalNoteAction, removeMyLibAction } from '@/app/mylib/action';
 import { BookOpen, Copy, Edit3, ExternalLink, FileText, Info, Loader, Tag, Terminal, Trash2 } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { LibraryItem } from './useLibStore';
+import { LibraryItem, setPassModalStatus, setPendingAction, useLibStore } from './useLibStore';
 
 export default function MyLibCard({ item }: { item: LibraryItem; }) {
+
+  const myPass = useLibStore(s => s.myPass);
 
 
 
   const [delPending, startDelTransition] = useTransition();
   function handleRemove(item: LibraryItem) {
-    startDelTransition(async () => {
-      const res = await removeMyLibAction(item);
-      if (res.success) {
-        toast.success(res?.message);
-      } else {
-        toast.error(res?.message);
-      }
-    });
+
+    const removeLogic = () => {
+      startDelTransition(async () => {
+        const res = await removeMyLibAction(item);
+        if (res.success) {
+          toast.success(res?.message);
+        } else {
+          toast.error(res?.message);
+        }
+      });
+    };
+
+    if (!myPass) {
+      setPendingAction(removeLogic);
+      setPassModalStatus(true);
+    } else {
+      removeLogic();
+    }
   }
 
 
@@ -26,17 +38,29 @@ export default function MyLibCard({ item }: { item: LibraryItem; }) {
 
   const [notePending, startNoteTransition] = useTransition();
   const [note, setNote] = useState('');
+
   function handleSave(item: LibraryItem) {
-    const temp = note || item.personalNote;
-    const updatedItem = { ...item, personalNote: temp };
-    startNoteTransition(async () => {
-      const res = await personalNoteAction(updatedItem);
-      if (res.success) {
-        toast.success(res?.message);
-      } else {
-        toast.error(res?.message);
-      }
-    });
+
+    const saveLogic = () => {
+      const temp = note || item.personalNote;
+      const updatedItem = { ...item, personalNote: temp };
+      startNoteTransition(async () => {
+        const res = await personalNoteAction(updatedItem);
+        if (res.success) {
+          toast.success(res?.message);
+        } else {
+          toast.error(res?.message);
+        }
+      });
+    };
+
+    if (!myPass) {
+      setPendingAction(saveLogic);
+      setPassModalStatus(true);
+    } else {
+      saveLogic();
+    }
+
   }
 
 

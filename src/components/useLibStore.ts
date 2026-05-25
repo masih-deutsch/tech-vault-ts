@@ -18,6 +18,7 @@ interface LibStoreState<T> {
   newEntryStatus: boolean;
   myPass: string;
   passModalStatus: boolean;
+  pendingAction: (() => void) | null;
 }
 
 
@@ -35,7 +36,8 @@ export const useLibStore = create<LibStoreState<LibraryItem>>()(() => ({
   },
   newEntryStatus: true,
   myPass: "",
-  passModalStatus: false
+  passModalStatus: false,
+  pendingAction: null
 }));
 
 
@@ -97,4 +99,8 @@ export function setMyPass(input: string) {
 
 export function setPassModalStatus(input: boolean) {
   useLibStore.setState({ passModalStatus: input });
+}
+
+export function setPendingAction(action: (() => void) | null) {
+  useLibStore.setState({ pendingAction: action });
 }

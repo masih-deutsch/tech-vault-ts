@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Toaster } from 'sonner';
+import PassModal from '@/components/PassModal';
 
 const jbMono = JetBrains_Mono({
   variable: '--font-jb-mono',
@@ -32,6 +33,8 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
         <Toaster position="top-center" richColors={true} theme='dark' offset={50} toastOptions={{
           classNames: { toast: '!bg-slate-900/90 !border !border-slate-700 !font-extrabold !text-lg', },
         }} />
+
+        <PassModal />
 
       </body>
     </html>

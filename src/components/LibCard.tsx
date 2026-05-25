@@ -3,7 +3,7 @@
 
 import { useTransition } from 'react';
 import { Bookmark, BookmarkPlus, Box, Loader, SquareArrowOutUpRight } from 'lucide-react';
-import { LibraryItem, setModalStatus, setNewEntryStatus, setTarget } from './useLibStore';
+import { LibraryItem, setModalStatus, setNewEntryStatus, setPassModalStatus, setPendingAction, setTarget, useLibStore } from './useLibStore';
 import { isBookmarkedAction } from '@/app/action';
 import { toast } from 'sonner';
 
@@ -12,20 +12,53 @@ import { toast } from 'sonner';
 
 export default function LibCard({ lib }: { lib: LibraryItem; }) {
 
+  const myPass = useLibStore(s => s.myPass);
+
+
+
 
   const [pending, startTransition] = useTransition();
+
   function handleBookmark(lib: LibraryItem) {
-    startTransition(async () => {
-      const res = await isBookmarkedAction(lib);
-      if (res.success) {
-        toast.success(res.message);
-      } else {
-        toast.error(res.message);
-      }
-    });
+
+    const bookmarkLogic = () => {
+      startTransition(async () => {
+        const res = await isBookmarkedAction(lib);
+        if (res.success) {
+          toast.success(res.message);
+        } else {
+          toast.error(res.message);
+        }
+      });
+    };
+
+    if (!myPass) {
+      setPendingAction(bookmarkLogic);
+      setPassModalStatus(true);
+    } else {
+      bookmarkLogic();
+    }
   }
 
 
+
+
+  function handleViewDetails() {
+
+    const viewDetailsLogic = () => {
+      setModalStatus(true);
+      setNewEntryStatus(false);
+      setTarget(lib);
+    };
+
+    if (!myPass) {
+      setPendingAction(viewDetailsLogic);
+      setPassModalStatus(true);
+    } else {
+      viewDetailsLogic();
+    }
+
+  }
 
 
   return (
@@ -47,9 +80,10 @@ export default function LibCard({ lib }: { lib: LibraryItem; }) {
       <div className="flex w-full shadow-sm">
         <button
           onClick={() => {
-            setModalStatus(true);
-            setTarget(lib);
-            setNewEntryStatus(false);
+            handleViewDetails();
+            // setModalStatus(true);
+            // setTarget(lib);
+            // setNewEntryStatus(false);
           }}
           className="flex flex-1 items-center justify-center gap-2 rounded-l-lg border border-r-0 border-slate-600 bg-slate-800 py-2.5 font-medium text-cyan-400 transition-colors hover:bg-slate-700 hover:text-white">
           View Details <SquareArrowOutUpRight className="h-4 w-4" />

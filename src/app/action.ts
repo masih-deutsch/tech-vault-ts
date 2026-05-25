@@ -19,12 +19,7 @@ export async function createLibAction(prev: (ActionResponse | null), formData: F
       description: formData.get('description') as string,
       installCommand: formData.get('installCommand') as string,
       docsUrl: formData.get('docsUrl') as string,
-      password: formData.get('password') as string
     };
-
-    if (payload.password !== process.env.ADMIN_PASSWORD) {
-      return { success: false, message: "Invalid password" };
-    }
 
     if (!payload.name || !payload.category || !payload.description || !payload.installCommand || !payload.docsUrl) {
       return { success: false, message: "All fields are required" };
@@ -52,12 +47,7 @@ export async function updateLibAction(target: LibraryItem, prev: (ActionResponse
       description: formData.get('description') as string,
       installCommand: formData.get('installCommand') as string,
       docsUrl: formData.get('docsUrl') as string,
-      password: formData.get('password') as string
     };
-
-    if (payload.password !== process.env.ADMIN_PASSWORD) {
-      return { success: false, message: "Invalid password" };
-    }
 
     if (!payload.name || !payload.category || !payload.description || !payload.installCommand || !payload.docsUrl) {
       return { success: false, message: "All fields are required" };
@@ -80,12 +70,8 @@ export async function updateLibAction(target: LibraryItem, prev: (ActionResponse
 }
 
 
-export async function removeLibAction(id: string | number, myPass: string): Promise<ActionResponse> {
+export async function removeLibAction(id: string | number): Promise<ActionResponse> {
   try {
-    if (myPass !== process.env.ADMIN_PASSWORD) {
-      return { success: false, message: "Invalid password" };
-    }
-
     const res = await removeLib(id);
     revalidatePath("/");
     revalidatePath("/mylib");
@@ -108,4 +94,12 @@ export async function isBookmarkedAction(data: LibraryItem) {
     if (error instanceof Error) return { success: false, message: error.message };
     return { success: false, message: "An unknown error occurred" };
   }
+}
+
+
+export async function passwordVerification(password: string) {
+  if (password === process.env.ADMIN_PASSWORD) {
+    return { success: true };
+  }
+  return { success: false, message: "Invalid Admin Password!" };
 }
