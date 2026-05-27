@@ -2,25 +2,26 @@
 
 import { createUser, findUserByEmail, verifyUser } from '@/components/neon';
 import { AuthCredentials } from '@/components/authTypes';
+import { SignupSchema } from '@/components/validations';
+import { z } from 'zod';
 
 interface ActionResponse {
   success: boolean;
   message: string;
-  user?: { name: string; email: string };
+  user?: { name: string; email: string; };
 }
 
-export async function signUpAction(
-  _prev: ActionResponse | null,
-  formData: FormData,
-): Promise<ActionResponse> {
+export async function signUpAction(_prev: ActionResponse | null, formData: FormData,): Promise<ActionResponse> {
   try {
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
 
-    if (!name || !email || !password) {
-      return { success: false, message: 'All fields are required' };
+    const payload = Object.fromEntries(formData);
+    const { data, success, error } = SignupSchema.safeParse(payload);
+
+    if (!success) {
+      return { success: false, message: z.prettifyError(error) };
     }
+
+    const { name, email, password } = data;
 
     const existing = await findUserByEmail(email);
     if (existing) {
@@ -39,10 +40,7 @@ export async function signUpAction(
   }
 }
 
-export async function signInAction(
-  _prev: ActionResponse | null,
-  formData: FormData,
-): Promise<ActionResponse> {
+export async function signInAction(_prev: ActionResponse | null, formData: FormData,): Promise<ActionResponse> {
   try {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
@@ -67,11 +65,7 @@ export async function signInAction(
   }
 }
 
-export async function getLibsAction(
-  query: string,
-  sort: string,
-  credentials: AuthCredentials | null,
-) {
+export async function getLibsAction(query: string, sort: string, credentials: AuthCredentials | null,) {
   const { getLibs } = await import('@/components/neon');
   return getLibs(query, sort, credentials);
 }

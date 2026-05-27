@@ -11,16 +11,13 @@ import { setAuthCredentials } from '@/components/authStorage';
 interface ActionResponse {
   success: boolean;
   message: string;
-  user?: { name: string; email: string };
+  user?: { name: string; email: string; };
 }
 
 export default function SignUpForm() {
   const router = useRouter();
-  const pendingCredentials = useRef<{ name: string; email: string; password: string } | null>(null);
-  const [state, formAction, pending] = useActionState<ActionResponse | null, FormData>(
-    signUpAction,
-    null,
-  );
+  const pendingCredentials = useRef<{ name: string; email: string; password: string; } | null>(null);
+  const [state, formAction, pending] = useActionState<ActionResponse | null, FormData>(signUpAction, null,);
 
   function handleSubmit(formData: FormData) {
     pendingCredentials.current = {
@@ -71,7 +68,7 @@ export default function SignUpForm() {
         <label className="block text-sm font-medium text-slate-400">
           Email
           <input
-            type="email"
+            type="text"
             name="email"
             required
             placeholder="jane@example.com"
